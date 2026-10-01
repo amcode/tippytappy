@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+    <!-- Hardened runtime is required for notarisation. The app needs no exceptions:
+         it uses NSEvent monitors (Input Monitoring TCC permission, not an entitlement)
+         and CoreAudio device properties, neither of which need the microphone entitlement
+         because no audio is captured. -->
+</dict>
+</plist>
