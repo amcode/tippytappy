@@ -106,6 +106,10 @@ build.sh
 - Some professional USB/Thunderbolt audio interfaces don't expose a software input volume; those can't be muted this way. The menu will tell you.
 - The app is ad-hoc signed. Gatekeeper may ask you to allow it in System Settings → Privacy & Security the first time.
 
+## Website
+
+The one-page site in `docs/` is published with GitHub Pages (Settings → Pages → Deploy from a branch → `main`, folder `/docs`). The download button reads the latest release from the GitHub API, so it updates itself when you tag a new version.
+
 ## Licence
 
 MIT — see [LICENSE](LICENSE).

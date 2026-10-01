@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Tippy Tappy — mutes your mic while you type</title>
+<meta name="description" content="Tippy Tappy is a free, open-source Mac menu bar app that mutes your microphone while you type and un-mutes when you stop.">
+<meta property="og:title" content="Tippy Tappy for macOS">
+<meta property="og:description" content="Mutes your microphone while you type. Free and open source.">
+<meta property="og:image" content="icon.png">
+<link rel="icon" href="icon.png">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --paper: #FFF7EE;
+    --ink: #2A1B10;
+    --ink-soft: #6B5546;
+    --orange: #FF8C3C;
+    --orange-deep: #C85A1E;
+    --key-face: #FFFDF9;
+    --key-side: #E6D6C4;
+    --red: #DC2828;
+    --max: 880px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --paper: #1B120C;
+      --ink: #FFF1E3;
+      --ink-soft: #C9AE97;
+      --key-face: #2E2017;
+      --key-side: #120B06;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; }
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-size: 18px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  a { color: var(--orange-deep); }
+  a:focus-visible, button:focus-visible, textarea:focus-visible { outline: 3px solid var(--orange); outline-offset: 3px; }
+
+  .wrap { max-width: var(--max); margin: 0 auto; padding: 0 20px; }
+
+  /* Header */
+  header { padding: 28px 0 0; display: flex; align-items: center; justify-content: space-between; gap: 16px; }
+  .brand { display: flex; align-items: center; gap: 12px; font-weight: 800; text-decoration: none; color: var(--ink); font-size: 20px; }
+  .brand img { width: 36px; height: 36px; border-radius: 9px; }
+  header nav a { color: var(--ink-soft); text-decoration: none; margin-left: 20px; font-weight: 600; }
+  header nav a:hover { color: var(--ink); }
+
+  /* Hero: keycaps */
+  .hero { padding: 72px 0 40px; text-align: center; }
+  .keys { display: flex; flex-wrap: wrap; justify-content: center; gap: 8px; margin: 0 0 32px; }
+  .keys .word { display: flex; gap: 8px; }
+  .key {
+    width: 64px; height: 64px;
+    display: grid; place-items: center;
+    background: var(--key-face);
+    border-radius: 12px;
+    box-shadow: 0 6px 0 var(--key-side), 0 8px 14px rgba(0,0,0,.12);
+    font-weight: 800; font-size: 32px; line-height: 1;
+    transform: translateY(0);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .key.down { transform: translateY(5px); box-shadow: 0 1px 0 var(--key-side), 0 2px 4px rgba(0,0,0,.12); }
+  .key.orange { background: var(--orange); color: #fff; box-shadow: 0 6px 0 var(--orange-deep), 0 8px 14px rgba(0,0,0,.12); }
+  .key.orange.down { box-shadow: 0 1px 0 var(--orange-deep), 0 2px 4px rgba(0,0,0,.12); }
+  @media (max-width: 560px) { .key { width: 44px; height: 44px; font-size: 22px; border-radius: 9px; } .keys { gap: 5px; } .keys .word { gap: 5px; } }
+
+  .hero h1 { font-size: clamp(28px, 4.5vw, 40px); font-weight: 600; line-height: 1.2; margin: 0 auto 12px; max-width: 24ch; letter-spacing: -0.01em; }
+  .hero p { color: var(--ink-soft); max-width: 48ch; margin: 0 auto 32px; }
+
+  .download {
+    display: inline-flex; align-items: center; gap: 12px;
+    background: var(--orange); color: #fff; text-decoration: none;
+    font-weight: 800; font-size: 20px;
+    padding: 16px 28px; border-radius: 16px;
+    box-shadow: 0 6px 0 var(--orange-deep);
+    transition: transform .08s, box-shadow .08s;
+  }
+  .download:hover { transform: translateY(2px); box-shadow: 0 4px 0 var(--orange-deep); }
+  .download:active { transform: translateY(6px); box-shadow: 0 0 0 var(--orange-deep); }
+  .download small { font-weight: 600; font-size: 14px; opacity: .85; }
+  .meta { margin-top: 14px; font-size: 15px; color: var(--ink-soft); }
+  .meta a { color: inherit; }
+
+  /* Demo */
+  .demo { margin: 56px auto 0; max-width: 620px; background: var(--key-face); border-radius: 20px; padding: 24px; box-shadow: 0 8px 0 var(--key-side), 0 12px 24px rgba(0,0,0,.08); text-align: left; }
+  .demo-head { display: flex; align-items: center; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+  .demo-head h2 { font-size: 16px; font-weight: 600; margin: 0; color: var(--ink-soft); }
+  .mic { display: inline-flex; align-items: center; gap: 8px; font-weight: 800; font-size: 15px; padding: 6px 12px 6px 8px; border-radius: 999px; background: rgba(0,0,0,.05); transition: background .2s, color .2s; }
+  .mic svg { width: 20px; height: 20px; }
+  .mic .live { color: #1E8A3A; }
+  .mic.muted { background: rgba(220,40,40,.12); color: var(--red); }
+  .mic.muted .live { display: none; } .mic:not(.muted) .off { display: none; }
+  .demo textarea {
+    width: 100%; min-height: 110px; resize: vertical;
+    font: inherit; font-size: 17px; color: var(--ink);
+    background: var(--paper); border: 2px solid var(--key-side); border-radius: 12px; padding: 14px;
+  }
+  .demo p { margin: 12px 0 0; font-size: 15px; color: var(--ink-soft); }
+
+  /* Features */
+  .features { padding: 72px 0 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 40px 48px; }
+  .features h3 { font-size: 22px; font-weight: 800; margin: 0 0 6px; }
+  .features p { margin: 0; color: var(--ink-soft); }
+
+  /* How */
+  .how { padding: 48px 0; }
+  .how h2 { font-size: 28px; font-weight: 800; margin: 0 0 12px; }
+  .how p { max-width: 62ch; color: var(--ink-soft); }
+  .how ol { padding-left: 22px; color: var(--ink-soft); max-width: 62ch; }
+  .how li { margin-bottom: 8px; }
+  .how li b { color: var(--ink); }
+
+  footer { padding: 48px 0 56px; color: var(--ink-soft); font-size: 15px; display: flex; flex-wrap: wrap; gap: 12px 28px; justify-content: space-between; }
+  footer a { color: inherit; }
+
+  @media (max-width: 560px) { .features { grid-template-columns: 1fr; } }
+  @media (prefers-reduced-motion: reduce) {
+    .key, .download { transition: none; }
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <a class="brand" href="#"><img src="icon.png" alt="">Tippy Tappy</a>
+    <nav>
+      <a href="#how">How it works</a>
+      <a href="https://github.com/amcode/TippyTappy">GitHub</a>
+    </nav>
+  </header>
+
+  <section class="hero">
+    <div class="keys" aria-hidden="true">
+      <div class="word"><span class="key orange">T</span><span class="key">I</span><span class="key">P</span><span class="key">P</span><span class="key">Y</span></div>
+      <div class="word"><span class="key orange">T</span><span class="key">A</span><span class="key">P</span><span class="key">P</span><span class="key">Y</span></div>
+    </div>
+    <h1>Mutes your mic while you type, so your keyboard stays out of the call.</h1>
+    <p>A small, free Mac menu bar app. Start typing and your microphone goes quiet; stop and it comes back. Works with Zoom, Teams, Meet, Discord — anything that uses your mic.</p>
+    <a class="download" id="download" href="https://github.com/amcode/TippyTappy/releases/latest">
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v13"/><path d="m7 11 5 5 5-5"/><path d="M5 21h14"/></svg>
+      Download for Mac
+    </a>
+    <div class="meta" id="meta">macOS 13 or later · free and open source</div>
+
+    <div class="demo">
+      <div class="demo-head">
+        <h2>Try it: type something</h2>
+        <span class="mic" id="mic" aria-live="polite">
+          <svg class="live" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/></svg>
+          <svg class="off" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0"/><path d="M12 18v3"/><path d="m4 4 16 16"/></svg>
+          <span id="micLabel">Mic live</span>
+        </span>
+      </div>
+      <textarea id="typebox" placeholder="Hammer away on your clickiest keys…" aria-label="Demo text area"></textarea>
+      <p>That's the whole app. The real one does this for every app on your Mac, from the menu bar.</p>
+    </div>
+  </section>
+
+  <section class="features">
+    <div>
+      <h3>Nothing to click</h3>
+      <p>It just watches for typing. The first keystroke mutes, and a second after the last one you're back.</p>
+    </div>
+    <div>
+      <h3>Any app, any mic</h3>
+      <p>It turns down the system input volume rather than fiddling with each app, so it works with whatever you use to talk.</p>
+    </div>
+    <div>
+      <h3>Pause when you need to</h3>
+      <p>Pair-programming? Pause it from the menu bar and type as loudly as you like.</p>
+    </div>
+    <div>
+      <h3>Make it yours</h3>
+      <p>Three menu bar icons, an optional mute indicator, a tunable delay, and launch at login.</p>
+    </div>
+  </section>
+
+  <section class="how" id="how">
+    <h2>How it works</h2>
+    <p>Tippy Tappy sits in your menu bar. On first launch macOS asks for Input Monitoring permission — that's how it knows you're typing. It never records keystrokes, and the code is open for you to check.</p>
+    <ol>
+      <li><b>Install.</b> Open the download, drag Tippy Tappy to Applications, open it.</li>
+      <li><b>Allow Input Monitoring</b> when prompted. If the menu bar still shows a warning, relaunch the app.</li>
+      <li><b>Type.</b> Watch the icon change while your mic is muted, and change back when you stop.</li>
+    </ol>
+  </section>
+
+  <footer>
+    <span>Free, open source, MIT licensed.</span>
+    <span><a href="https://github.com/amcode/TippyTappy">Source code</a> · <a href="https://github.com/amcode/TippyTappy/releases">All releases</a> · <a href="https://github.com/amcode/TippyTappy/issues">Report a problem</a></span>
+  </footer>
+</div>
+
+<script>
+  // Demo: mute while typing, unmute 1s after the last keystroke.
+  (function () {
+    var box = document.getElementById('typebox');
+    var mic = document.getElementById('mic');
+    var label = document.getElementById('micLabel');
+    var keys = document.querySelectorAll('.key');
+    var timer = null;
+    function mute() { mic.classList.add('muted'); label.textContent = 'Mic muted'; }
+    function unmute() { mic.classList.remove('muted'); label.textContent = 'Mic live'; }
+    box.addEventListener('keydown', function () {
+      mute();
+      clearTimeout(timer);
+      timer = setTimeout(unmute, 1000);
+      // press a random keycap in the hero
+      var k = keys[Math.floor(Math.random() * keys.length)];
+      k.classList.add('down');
+      setTimeout(function () { k.classList.remove('down'); }, 90);
+    });
+  })();
+
+  // Download button: point at the latest .dmg if the GitHub API is reachable.
+  (function () {
+    var repo = 'amcode/TippyTappy';
+    var btn = document.getElementById('download');
+    var meta = document.getElementById('meta');
+    fetch('https://api.github.com/repos/' + repo + '/releases/latest')
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (rel) {
+        if (!rel || !rel.assets) return;
+        var dmg = rel.assets.find(function (a) { return /\.dmg$/i.test(a.name); });
+        if (dmg) btn.href = dmg.browser_download_url;
+        meta.textContent = 'Version ' + rel.tag_name.replace(/^v/, '') + ' · macOS 13 or later · free and open source';
+      })
+      .catch(function () {});
+  })();
+</script>
+</body>
+</html>
